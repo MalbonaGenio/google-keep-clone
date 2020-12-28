@@ -40,7 +40,7 @@ class App {
 
   openForm() {
     this.$form.classList.add('form-open')
-    this.$noteTitle.style.diplay = 'block'
+    this.$noteTitle.style.display = 'block'
     this.$formButtons.style.display = 'block'
   }
 
