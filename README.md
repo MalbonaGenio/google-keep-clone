@@ -1,2 +1,4 @@
 # google-keep-clone
-A clone of google keep created to strengthen my knowldege of HTML, CSS and Javascript
+A clone of google keep. This project was used to strengthen my knowledge of Javascript. This is an exercise from a Javascript Bootcamp.
+
+
