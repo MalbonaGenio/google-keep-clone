@@ -37,7 +37,16 @@ class App {
   handleFormClick(event) {
     //checks if the form elemtn is the target of the click
     const isFormClicked = this.$form.contains(event.target)
-    isFormClicked ? this.openForm() : this.closeForm()
+    const title = this.$noteTitle.value
+    const text = this.$noteText.value
+    const hasNote = title || text
+    if (isFormClicked) {
+      this.openForm()
+    } else if (hasNote) {
+      //if there is some content in the note when cliking away will create a note. Whitout having to use the submit.
+      this.addNote({ title, text })
+    } else this.closeForm()
+    // isFormClicked ? this.openForm() : this.closeForm()
   }
 
   openForm() {
@@ -54,10 +63,10 @@ class App {
     this.$noteText.value = ""
   }
 
-  addNote(note) {
+  addNote({ title, text }) {
     const newNote = {
-      title: note.title,
-      text: note.text,
+      title,
+      text,
       color: "white",
       //sets the id of the note based on the amount of notes in the notes array
       id: this.notes.length > 0 ? this.notes[this.notes.length - 1].id + 1 : 1
