@@ -4,6 +4,9 @@ class App {
 
     //data elements
     this.notes = []
+    this.title = ""
+    this.text = ""
+    this.id = ""
     //HTML elements
     this.$form = document.querySelector("#form")
     this.$noteTitle = document.querySelector("#note-title")
@@ -13,6 +16,9 @@ class App {
     this.$placeHolder = document.querySelector("#placeholder")
     this.$notes = document.querySelector("#notes")
     this.$modal = document.querySelector(".modal")
+    this.$modalTitle = document.querySelector(".modal-title")
+    this.$modalText = document.querySelector(".modal-text")
+    this.$modalCloseButton = document.querySelector(".modal-close-button")
 
     this.addEventListeners() //want to make sure we run the method when we create the app
   }
@@ -21,6 +27,8 @@ class App {
   addEventListeners() {
     document.body.addEventListener("click", (event) => {
       this.handleFormClick(event)
+      //selectNote needs to run before openModal. To set the values in the constructor before the modal opens, otherwise the fields will not be populated with the note info.
+      this.selectNote(event)
       this.openModal(event)
     })
 
@@ -39,6 +47,10 @@ class App {
     this.$formCloseButton.addEventListener("click", (event) => {
       event.stopPropagation() //this avoid the click on the close to also act as a click on the form and thus opening the form.
       this.closeForm()
+    })
+
+    this.$modalCloseButton.addEventListener("click", (event) => {
+      this.closeModal()
     })
   }
 
@@ -74,7 +86,14 @@ class App {
   openModal(event) {
     if (event.target.closest(".note")) {
       this.$modal.classList.toggle("open-modal")
+      this.$modalTitle.value = this.title
+      this.$modalText.value = this.text
     }
+  }
+
+  closeModal(event) {
+    this.editNote()
+    this.$modal.classList.toggle("open-modal")
   }
 
   addNote({ title, text }) {
@@ -85,10 +104,33 @@ class App {
       //sets the id of the note based on the amount of notes in the notes array
       id: this.notes.length > 0 ? this.notes[this.notes.length - 1].id + 1 : 1
     }
-
     this.notes = [...this.notes, newNote] //spreads the array notes and adds the newNote at the end, this way we update the array without mutating the original, we will preserve all the old notes stored there.
     this.displayNotes()
     this.closeForm()
+  }
+
+  editNote() {
+    //take the values for title and text from the html modal input
+    const title = this.$modalTitle.value
+    const text = this.$modalText.value
+    // map trough the notes array, when the id of both elements match we spread the object and put the title and text so we update the fields with the new values.
+    //use Number bc the this.id on the html is a string while the one on the object array is a number.
+    this.notes = this.notes.map((note) =>
+      note.id === Number(this.id) ? { ...note, title, text } : note
+    )
+    this.displayNotes()
+  }
+
+  selectNote(event) {
+    const $selectedNote = event.target.closest(".note")
+    if (!$selectedNote) return //makes sure to not run the rest of the code if the is no note selected.
+    //.children will return an array of the selected element. We also know that the two first children are title and text. So using array deconstructing we can assign the values directly.
+    const [$noteTitle, $noteText] = $selectedNote.children
+    //assing the values to the ones defined in the constructor so we can use them in anyother method too.
+    this.title = $noteTitle.innerText
+    this.text = $noteText.innerText
+    //what comes after the data- in the html will be a property of dataset in this case id
+    this.id = $selectedNote.dataset.id
   }
 
   displayNotes() {
@@ -96,10 +138,11 @@ class App {
     this.$placeHolder.style.display = hasNotes ? "none" : "flex"
     //using .map iterates trough the notes array and returns all the following html to the new notes to display.
     //Setting the innerhtml to the .map will populate the div notes with all the generated code with each note data.
+    //The data-id allows us to store data in the html markup, can we used to retrive info about the note for the selectNote method.
     this.$notes.innerHTML = this.notes
       .map(
         (note) => `
-        <div style="background: ${note.color};" class="note">
+        <div style="background: ${note.color};" class="note" data-id="${note.id}">
           <div class="${note.title && "note-title"}">${note.title}</div>
           <div class="note-text">${note.text}</div>
           <div class="toolbar-container">
