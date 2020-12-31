@@ -12,6 +12,7 @@ class App {
     this.$formCloseButton = document.querySelector("#form-close-button")
     this.$placeHolder = document.querySelector("#placeholder")
     this.$notes = document.querySelector("#notes")
+    this.$modal = document.querySelector(".modal")
 
     this.addEventListeners() //want to make sure we run the method when we create the app
   }
@@ -20,6 +21,7 @@ class App {
   addEventListeners() {
     document.body.addEventListener("click", (event) => {
       this.handleFormClick(event)
+      this.openModal(event)
     })
 
     //event listener for the submit of the form, includes the button and enter key
@@ -67,6 +69,12 @@ class App {
     this.$formButtons.style.display = "none"
     this.$noteTitle.value = ""
     this.$noteText.value = ""
+  }
+
+  openModal(event) {
+    if (event.target.closest(".note")) {
+      this.$modal.classList.toggle("open-modal")
+    }
   }
 
   addNote({ title, text }) {
