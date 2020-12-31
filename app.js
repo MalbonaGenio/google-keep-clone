@@ -9,6 +9,7 @@ class App {
     this.$noteTitle = document.querySelector("#note-title")
     this.$noteText = document.querySelector("#note-text")
     this.$formButtons = document.querySelector("#form-buttons")
+    this.$formCloseButton = document.querySelector("#form-close-button")
     this.$placeHolder = document.querySelector("#placeholder")
     this.$notes = document.querySelector("#notes")
 
@@ -31,6 +32,11 @@ class App {
         //instead of passing to arguments we pass a single object so if we dont remember the exact order we will still be able to get the data correctly. This shorthand is equal to write title: title.
         this.addNote({ title, text }) //
       }
+    })
+
+    this.$formCloseButton.addEventListener("click", (event) => {
+      event.stopPropagation() //this avoid the click on the close to also act as a click on the form and thus opening the form.
+      this.closeForm()
     })
   }
 
