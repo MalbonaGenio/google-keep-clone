@@ -50,6 +50,8 @@ class App {
     this.$form.classList.remove("form-open")
     this.$noteTitle.style.display = "none"
     this.$formButtons.style.display = "none"
+    this.$noteTitle.value = ""
+    this.$noteText.value = ""
   }
 
   addNote(note) {
@@ -63,6 +65,7 @@ class App {
 
     this.notes = [...this.notes, newNote] //spreads the array notes and adds the newNote at the end, this way we update the array without mutating the original, we will preserve all the old notes stored there.
     this.displayNotes()
+    this.closeForm()
   }
 
   displayNotes() {
