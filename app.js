@@ -19,6 +19,7 @@ class App {
     this.$modalTitle = document.querySelector(".modal-title")
     this.$modalText = document.querySelector(".modal-text")
     this.$modalCloseButton = document.querySelector(".modal-close-button")
+    this.$colorTooltip = document.querySelector("#color-tooltip")
 
     this.addEventListeners() //want to make sure we run the method when we create the app
   }
@@ -30,6 +31,32 @@ class App {
       //selectNote needs to run before openModal. To set the values in the constructor before the modal opens, otherwise the fields will not be populated with the note info.
       this.selectNote(event)
       this.openModal(event)
+      this.deleteNote(event)
+    })
+
+    document.body.addEventListener("mouseover", (event) => {
+      this.openTooltip(event)
+    })
+
+    document.body.addEventListener("mouseout", (event) => {
+      this.closeTooltip(event)
+    })
+
+    //Use Function instead of and arrow function bc we need to reference the $colorTooltip element inside the function. With an arrow funstion we would jumpt one level above the scope.
+    this.$colorTooltip.addEventListener("mouseover", function () {
+      //will keep the colorTooltip open
+      this.style.display = "flex"
+    })
+
+    this.$colorTooltip.addEventListener("mouseout", function () {
+      this.style.display = "none"
+    })
+
+    this.$colorTooltip.addEventListener("click", (event) => {
+      const color = event.target.dataset.color
+      if (color) {
+        this.editNoteColor(color)
+      }
     })
 
     //event listener for the submit of the form, includes the button and enter key
@@ -84,6 +111,9 @@ class App {
   }
 
   openModal(event) {
+    //prevents opening the modal when we click the  trash button
+    if (event.target.matches(".toolbar-delete")) return
+
     if (event.target.closest(".note")) {
       this.$modal.classList.toggle("open-modal")
       this.$modalTitle.value = this.title
@@ -94,6 +124,23 @@ class App {
   closeModal(event) {
     this.editNote()
     this.$modal.classList.toggle("open-modal")
+  }
+
+  openTooltip(event) {
+    //if not hovering over the rigth element return
+    if (!event.target.matches(".toolbar-color")) return
+    this.id = event.target.dataset.id
+    const noteCoordinates = event.target.getBoundingClientRect()
+    const horizontal = noteCoordinates.left + window.scrollX
+    const vertical = noteCoordinates.top + window.scrollY
+    this.$colorTooltip.style.transform = `translate(${horizontal}px ,${vertical}px)`
+    this.$colorTooltip.style.display = "flex"
+  }
+
+  closeTooltip(event) {
+    //if not hovering over the rigth element return
+    if (!event.target.matches(".toolbar-color")) return
+    this.$colorTooltip.style.display = "none"
   }
 
   addNote({ title, text }) {
@@ -121,6 +168,14 @@ class App {
     this.displayNotes()
   }
 
+  //The color is passed from the event listener click, that gathers the color from the dataset.color
+  editNoteColor(color) {
+    this.notes = this.notes.map((note) =>
+      note.id === Number(this.id) ? { ...note, color } : note
+    )
+    this.displayNotes()
+  }
+
   selectNote(event) {
     const $selectedNote = event.target.closest(".note")
     if (!$selectedNote) return //makes sure to not run the rest of the code if the is no note selected.
@@ -131,6 +186,15 @@ class App {
     this.text = $noteText.innerText
     //what comes after the data- in the html will be a property of dataset in this case id
     this.id = $selectedNote.dataset.id
+  }
+
+  deleteNote(event) {
+    //prevents bubbling with the open modal
+    event.stopPropagation()
+    if (!event.target.matches(".toolbar-delete")) return
+    const id = event.target.dataset.id
+    this.notes = this.notes.filter((note) => note.id !== Number(id))
+    this.displayNotes()
   }
 
   displayNotes() {
@@ -147,8 +211,12 @@ class App {
           <div class="note-text">${note.text}</div>
           <div class="toolbar-container">
             <div class="toolbar">
-              <img class="toolbar-color" src="https://icon.now.sh/palette">
-              <img class="toolbar-delete" src="https://icon.now.sh/delete">
+              <img class="toolbar-color" data-id="${
+                note.id
+              }" src="https://icon.now.sh/palette">
+              <img class="toolbar-delete" data-id="${
+                note.id
+              }" src="https://icon.now.sh/delete">
             </div>
           </div>
         </div>
